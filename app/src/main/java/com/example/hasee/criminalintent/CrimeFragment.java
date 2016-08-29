@@ -44,7 +44,7 @@ public class CrimeFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    mCrime.setmCrimeTitle(s.toString());
+                    mCrime.setCrimeTitle(s.toString());
             }
 
             @Override
@@ -52,7 +52,7 @@ public class CrimeFragment extends Fragment {
 
             }
         });
-        mDateBtn.setText(Crime.sdf.format(mCrime.getmDate()).toString());
+        mDateBtn.setText(Crime.sdf.format(mCrime.getDate()).toString());
         mDateBtn.setEnabled(false);
         mSolvedCb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
