@@ -1,6 +1,7 @@
 package com.example.hasee.criminalintent;
 
-import android.app.Fragment;
+
+import android.support.v4.app.Fragment;
 
 /**
  * Created by hasee on 2016/8/29.
