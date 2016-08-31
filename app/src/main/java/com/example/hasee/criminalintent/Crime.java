@@ -1,5 +1,7 @@
 package com.example.hasee.criminalintent;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -17,6 +19,10 @@ public class Crime {
     public Crime(){
         mCrimeId =UUID.randomUUID();
         mDate = new Date();
+    }
+
+    public void setDate(Date date) {
+        mDate = date;
     }
 
     public UUID getCrimeId() {

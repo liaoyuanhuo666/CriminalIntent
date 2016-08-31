@@ -1,8 +1,12 @@
 package com.example.hasee.criminalintent;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -14,6 +18,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -22,15 +27,17 @@ import java.util.UUID;
 public class CrimeFragment extends Fragment {
     private static final String TAG = "CrimeFragment";
     public static final String EXTRA_CRIME_ID = "com.example.hasee.criminalintent.crimeId";
+    private static final String DIALOG_DATA = "dialog_date";
+    private static final int REQUEST_CODE = 0;
     private Crime mCrime;
     private EditText mCrimeTitle;
     private Button mDateBtn;
     private CheckBox mSolvedCb;
 
-    public static CrimeFragment getInstanse(UUID crimeId){
+    public static CrimeFragment getInstanse(UUID crimeId) {
         Bundle args = new Bundle();
-        args.putSerializable(EXTRA_CRIME_ID,crimeId);
-        CrimeFragment  fragment = new CrimeFragment();
+        args.putSerializable(EXTRA_CRIME_ID, crimeId);
+        CrimeFragment fragment = new CrimeFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -38,7 +45,7 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UUID crimeId = (UUID)getArguments().getSerializable(EXTRA_CRIME_ID);
+        UUID crimeId = (UUID) getArguments().getSerializable(EXTRA_CRIME_ID);
         if (crimeId != null) {
             mCrime = CrimeLab.getInstanse(getActivity()).getCrime(crimeId);
         }
@@ -68,8 +75,19 @@ public class CrimeFragment extends Fragment {
 
             }
         });
-        mDateBtn.setText(Crime.sdf.format(mCrime.getDate()));
-        mDateBtn.setEnabled(false);
+        updateDate();
+        //mDateBtn.setEnabled(false);
+        mDateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // DatePickerFragment dialog = new DatePickerFragment();
+                DatePickerFragment dialog = DatePickerFragment.getInstanse(mCrime.getDate());
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                dialog.setTargetFragment(CrimeFragment.this, REQUEST_CODE);
+                dialog.show(fm, DIALOG_DATA);
+            }
+        });
         mSolvedCb.setChecked(mCrime.isSolved());
         mSolvedCb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -81,5 +99,21 @@ public class CrimeFragment extends Fragment {
         return view;
     }
 
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+        if (requestCode == REQUEST_CODE) {
+            Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+            mCrime.setDate(date);
+            updateDate();
+        }
+    }
+
+    private void updateDate() {
+        mDateBtn.setText(Crime.sdf.format(mCrime.getDate()));
+    }
 
 }
