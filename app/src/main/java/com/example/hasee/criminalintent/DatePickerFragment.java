@@ -28,12 +28,14 @@ public class DatePickerFragment extends DialogFragment {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
+        final int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        final int minuteOfHour = calendar.get(Calendar.MINUTE);
         View v = getActivity().getLayoutInflater().inflate(R.layout.dialog_date,null);
         DatePicker datePicker = (DatePicker) v.findViewById(R.id.crime_date_picker);
         datePicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                mDate = new GregorianCalendar(year,monthOfYear,dayOfMonth).getTime();
+                mDate = new GregorianCalendar(year,monthOfYear,dayOfMonth,hour,minuteOfHour).getTime();
                 getArguments().putSerializable(EXTRA_DATE,mDate);
             }
         });

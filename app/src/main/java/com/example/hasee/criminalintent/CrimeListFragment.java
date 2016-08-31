@@ -58,7 +58,7 @@ private static final String TAG = "CrimeListFragment";
             titleTextView.setText(c.getCrimeTitle());
             TextView dateTextView =
                     (TextView) convertView.findViewById(R.id.crime_list_item_dateTextView);
-            dateTextView.setText(Crime.sdf.format(c.getDate()));
+            dateTextView.setText(Crime.dateSdf.format(c.getDate()));
             CheckBox solvedCheckBox =
                     (CheckBox) convertView.findViewById(R.id.crime_list_item_solvedCheckBox);
             solvedCheckBox.setChecked(c.isSolved());
