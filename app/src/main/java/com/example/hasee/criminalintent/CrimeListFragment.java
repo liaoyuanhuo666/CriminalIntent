@@ -1,6 +1,7 @@
 package com.example.hasee.criminalintent;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -114,7 +115,7 @@ public class CrimeListFragment extends ListFragment {
             titleTextView.setText(c.getCrimeTitle());
             TextView dateTextView =
                     (TextView) convertView.findViewById(R.id.crime_list_item_dateTextView);
-            dateTextView.setText(Crime.sdf.format(c.getDate()));
+            dateTextView.setText(Util.dateSdf.format(c.getDate()));
             CheckBox solvedCheckBox =
                     (CheckBox) convertView.findViewById(R.id.crime_list_item_solvedCheckBox);
             solvedCheckBox.setChecked(c.isSolved());
