@@ -15,8 +15,7 @@ public class Crime {
     private String mCrimeTitle;
     private Date mDate;
     private boolean mSolved;
-    public static SimpleDateFormat dateSdf = new SimpleDateFormat("E yyyy年MM月dd日 hh:mm", Locale.CHINA);
-    public static SimpleDateFormat timeSdf = new SimpleDateFormat("hh:mm", Locale.CHINA);
+
     public Crime(){
         mCrimeId =UUID.randomUUID();
         mDate = new Date();
