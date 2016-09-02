@@ -153,6 +153,12 @@ public class CrimeFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        CrimeLab.getInstanse(getActivity()).saveCrimes();
+    }
+
     @TargetApi(11)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

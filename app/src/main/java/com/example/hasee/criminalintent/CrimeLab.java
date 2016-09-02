@@ -1,7 +1,11 @@
 package com.example.hasee.criminalintent;
 
 import android.content.Context;
+import android.util.Log;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -12,10 +16,20 @@ public class CrimeLab {
     private ArrayList<Crime> mCrimes;
     private Context mApplicationContext;
     public static CrimeLab sCrimeLab;
+    private CriminalIntentJSONSerializer mSerializer;
+    private static final String FILENAME = "crime.json";
+    private static final String TAG = "CrimeLab";
+
 
     private CrimeLab(Context context) {
         mApplicationContext = context;
-        mCrimes = new ArrayList<>();
+        mSerializer = new CriminalIntentJSONSerializer(mApplicationContext, FILENAME);
+        try {
+            mCrimes = mSerializer.loadCrimes();
+        } catch (Exception e) {
+            mCrimes = new ArrayList<>();
+            Log.i(TAG, "load crimes fail" + e);
+        }
     }
 
     public static CrimeLab getInstanse(Context context) {
@@ -38,7 +52,19 @@ public class CrimeLab {
         return null;
     }
 
-    public void add(Crime crime){
+    public void add(Crime crime) {
         mCrimes.add(crime);
+    }
+
+    public boolean saveCrimes() {
+        try {
+            mSerializer.saveCrimes(mCrimes);
+            Log.i(TAG, "save crimes Success");
+            return true;
+        } catch (Exception e) {
+            Log.i(TAG, "save crimes fail:" + e);
+            return false;
+        }
+
     }
 }
