@@ -3,7 +3,6 @@ package com.example.hasee.criminalintent;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -23,7 +22,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-
 import java.util.Date;
 import java.util.UUID;
 
@@ -156,7 +154,8 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        CrimeLab.getInstanse(getActivity()).saveCrimes();
+        CrimeLab.getInstanse(getActivity()).saveCrimesToSdcard();
+      //  CrimeLab.getInstanse(getActivity()).saveCrimes();
     }
 
     @TargetApi(11)

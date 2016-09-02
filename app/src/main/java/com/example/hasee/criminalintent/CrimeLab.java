@@ -25,7 +25,8 @@ public class CrimeLab {
         mApplicationContext = context;
         mSerializer = new CriminalIntentJSONSerializer(mApplicationContext, FILENAME);
         try {
-            mCrimes = mSerializer.loadCrimes();
+           // mCrimes = mSerializer.loadCrimes();
+           mCrimes = mSerializer.loadCrimesFromSdcard();
         } catch (Exception e) {
             mCrimes = new ArrayList<>();
             Log.i(TAG, "load crimes fail" + e);
@@ -65,6 +66,16 @@ public class CrimeLab {
             Log.i(TAG, "save crimes fail:" + e);
             return false;
         }
+    }
 
+    public boolean saveCrimesToSdcard() {
+        try {
+            mSerializer.saveCrimesToSdcard(mCrimes);
+            Log.i(TAG, "save crimes2Sdcard Success");
+            return true;
+        } catch (Exception e) {
+            Log.i(TAG, "save crimes2Sdcard fail:" + e);
+            return false;
+        }
     }
 }
