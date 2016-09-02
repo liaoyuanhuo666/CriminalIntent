@@ -107,7 +107,7 @@ public class CrimeFragment extends Fragment {
                 dialog.show(fm, DIALOG_DATA);
             }
         });
-        mTimeBtn.setText(Crime.timeSdf.format(mCrime.getDate()));
+        mTimeBtn.setText(Util.timeSdf.format(mCrime.getDate()));
         mTimeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -182,12 +182,12 @@ public class CrimeFragment extends Fragment {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             Log.i(TAG,date.toString());
             mCrime.setDate(date);
-            mTimeBtn.setText(Crime.timeSdf.format(mCrime.getDate()));
+            mTimeBtn.setText(Util.timeSdf.format(mCrime.getDate()));
         }
     }
 
     private void updateDate() {
-        mDateBtn.setText(Crime.dateSdf.format(mCrime.getDate()));
+        mDateBtn.setText(Util.dateSdf.format(mCrime.getDate()));
     }
 
 }

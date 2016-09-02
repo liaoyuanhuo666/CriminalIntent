@@ -1,7 +1,7 @@
 package com.example.hasee.criminalintent;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -12,7 +12,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 public class CrimeListFragment extends ListFragment {
     private static final String TAG = "CrimeListFragment";
     private boolean mSubTitleVisiable;
+    ArrayList<Crime> mCrimes;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,18 +34,44 @@ public class CrimeListFragment extends ListFragment {
         setHasOptionsMenu(true);
         setRetainInstance(true);
         mSubTitleVisiable = false;
-        ArrayList<Crime> mCrimes = CrimeLab.getInstanse(getActivity()).getCrimes();
+        mCrimes = CrimeLab.getInstanse(getActivity()).getCrimes();
         CrimeAdapter adapter = new CrimeAdapter(mCrimes);
         setListAdapter(adapter);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        View view = inflater.inflate(R.layout.emptyview,container,false);
+        ListView listView = (ListView) view.findViewById(android.R.id.list);
+        TextView textView = (TextView)view.findViewById(android.R.id.empty);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Crime crime = new Crime();
+                CrimeLab.getInstanse(getActivity()).add(crime);
+                Intent intent = new Intent(getActivity(), CrimePagerActivity.class);
+                intent.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getCrimeId());
+                startActivityForResult(intent, 0);
+            }
+        });
+
+        listView.setEmptyView(textView);
+        return view;
+       /* View v = super.onCreateView(inflater, container, savedInstanceState);
+        if (mCrimes.size() == 0) {
+            ListView listView = (ListView) v.findViewById(android.R.id.list);
+            TextView emptyView = new TextView(getActivity());
+            emptyView.setText("空着");
+            emptyView.setTextColor(Color.RED);
+            ((ViewGroup) listView.getParent()).addView(emptyView);
+            listView.setEmptyView(emptyView);
+        }
         if (mSubTitleVisiable) {
             getActivity().getActionBar().setSubtitle(R.string.subtitle);
         }
-        return  v;
+        return v;*/
+
+
     }
 
     @Override
@@ -57,7 +86,7 @@ public class CrimeListFragment extends ListFragment {
         Log.i(TAG, menu.toString());
         inflater.inflate(R.menu.fragment_crime_list, menu);
         MenuItem item = menu.findItem(R.id.menu_item_show_subtitle);
-        if (mSubTitleVisiable && item !=null) {
+        if (mSubTitleVisiable && item != null) {
             item.setTitle(R.string.hide_subtitle);
         }
     }
@@ -76,7 +105,7 @@ public class CrimeListFragment extends ListFragment {
                 if (getActivity().getActionBar().getSubtitle() == null) {
                     getActivity().getActionBar().setSubtitle(R.string.subtitle);
                     item.setTitle(R.string.hide_subtitle);
-                    mSubTitleVisiable =true;
+                    mSubTitleVisiable = true;
                 } else {
                     getActivity().getActionBar().setSubtitle(null);
                     item.setTitle(R.string.show_subtitle);
