@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,6 +27,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import java.util.Date;
 import java.util.UUID;
@@ -45,6 +48,7 @@ public class CrimeFragment extends Fragment {
     private Button mTimeBtn;
     private Button mchooseBtn;
     private CheckBox mSolvedCb;
+    private ImageButton mCameraImageBtn;
 
     public static CrimeFragment getInstanse(UUID crimeId) {
         Bundle args = new Bundle();
@@ -80,6 +84,7 @@ public class CrimeFragment extends Fragment {
         mTimeBtn = (Button) view.findViewById(R.id.crime_time);
         mchooseBtn = (Button) view.findViewById(R.id.choose_data_or_time);
         mSolvedCb = (CheckBox) view.findViewById(R.id.crime_solved);
+        mCameraImageBtn = (ImageButton) view.findViewById(R.id.crime_camera_imagebtn);
         mCrimeTitle.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -116,7 +121,7 @@ public class CrimeFragment extends Fragment {
                 TimePickerFragment timePickerFragment = TimePickerFragment.getInstanse(mCrime.getDate());
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 timePickerFragment.setTargetFragment(CrimeFragment.this, REQUEST_CODE_TIME);
-                timePickerFragment.show(fm,DIALOG_TIME);
+                timePickerFragment.show(fm, DIALOG_TIME);
             }
         });
         mchooseBtn.setOnClickListener(new View.OnClickListener() {
@@ -138,7 +143,7 @@ public class CrimeFragment extends Fragment {
                                 TimePickerFragment timePickerFragment = TimePickerFragment.getInstanse(mCrime.getDate());
                                 FragmentManager fm = getActivity().getSupportFragmentManager();
                                 timePickerFragment.setTargetFragment(CrimeFragment.this, REQUEST_CODE_TIME);
-                                timePickerFragment.show(fm,DIALOG_TIME);
+                                timePickerFragment.show(fm, DIALOG_TIME);
                             }
                         })
                         .create().show();
@@ -151,6 +156,18 @@ public class CrimeFragment extends Fragment {
                 mCrime.setSolved(isChecked);
             }
         });
+        mCameraImageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), CrimeCameraActivity.class);
+                startActivity(intent);
+            }
+        });
+        boolean hasCamera = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)
+                || Camera.getNumberOfCameras() > 0;
+        if (!hasCamera) {
+            mCameraImageBtn.setEnabled(false);
+        }
         Log.i(TAG, container.getClass() + ":" + container.toString());
         return view;
     }
@@ -164,7 +181,8 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.crime_list_item_context,menu);
+        inflater.inflate(R.menu.crime_list_item_context, menu);
+
     }
 
     @TargetApi(11)
@@ -199,7 +217,7 @@ public class CrimeFragment extends Fragment {
             updateDate();
         } else if (requestCode == REQUEST_CODE_TIME) {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
-            Log.i(TAG,date.toString());
+            Log.i(TAG, date.toString());
             mCrime.setDate(date);
             mTimeBtn.setText(Util.timeSdf.format(mCrime.getDate()));
         }
