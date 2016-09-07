@@ -3,10 +3,11 @@ package com.example.hasee.criminalintent;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import java.util.Date;
 import java.util.UUID;
@@ -42,6 +44,7 @@ public class CrimeFragment extends Fragment {
     private static final String DIALOG_TIME = "dialog_time";
     private static final int REQUEST_CODE = 0;
     private static final int REQUEST_CODE_TIME = 1;
+    private static final int REQUEST_PHOTO = 2;
     private Crime mCrime;
     private EditText mCrimeTitle;
     private Button mDateBtn;
@@ -49,6 +52,7 @@ public class CrimeFragment extends Fragment {
     private Button mchooseBtn;
     private CheckBox mSolvedCb;
     private ImageButton mCameraImageBtn;
+    private ImageView mImageView;
 
     public static CrimeFragment getInstanse(UUID crimeId) {
         Bundle args = new Bundle();
@@ -85,6 +89,8 @@ public class CrimeFragment extends Fragment {
         mchooseBtn = (Button) view.findViewById(R.id.choose_data_or_time);
         mSolvedCb = (CheckBox) view.findViewById(R.id.crime_solved);
         mCameraImageBtn = (ImageButton) view.findViewById(R.id.crime_camera_imagebtn);
+        mImageView = (ImageView) view.findViewById(R.id.crime_imageview);
+
         mCrimeTitle.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -160,7 +166,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), CrimeCameraActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent,REQUEST_PHOTO);
             }
         });
         boolean hasCamera = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)
@@ -169,7 +175,14 @@ public class CrimeFragment extends Fragment {
             mCameraImageBtn.setEnabled(false);
         }
         Log.i(TAG, container.getClass() + ":" + container.toString());
+
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        showPhoto();
     }
 
     @Override
@@ -217,14 +230,34 @@ public class CrimeFragment extends Fragment {
             updateDate();
         } else if (requestCode == REQUEST_CODE_TIME) {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
-            Log.i(TAG, date.toString());
             mCrime.setDate(date);
             mTimeBtn.setText(Util.timeSdf.format(mCrime.getDate()));
+        } else if (requestCode==REQUEST_PHOTO) {
+            String photoFileName = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
+            if (photoFileName!=null) {
+                Photo photo = new Photo(photoFileName);
+                mCrime.setPhoto(photo);
+                showPhoto();
+            }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        PictureUtils.cleanImageView(mImageView);
     }
 
     private void updateDate() {
         mDateBtn.setText(Util.dateSdf.format(mCrime.getDate()));
     }
-
+    private void showPhoto(){
+        Photo photo = mCrime.getPhoto();
+        BitmapDrawable drawable = null;
+        if (photo!=null) {
+            String filePath = getActivity().getFileStreamPath(photo.getFilename()).getAbsolutePath();
+            drawable = PictureUtils.getScaleDrawable(getActivity(),filePath);
+        }
+        mImageView.setImageDrawable(drawable);
+    }
 }
