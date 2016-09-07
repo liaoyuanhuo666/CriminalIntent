@@ -55,7 +55,7 @@ public class TimePickerFragment extends DialogFragment{
             }
         });
         return new TimePickerDialog.Builder(getActivity())
-                .setTitle(R.string.time_picker_title)
+                .setTitle(R.string.date_picker_title)
                 .setView(v)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override

@@ -5,6 +5,7 @@ import android.os.Environment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.BufferedReader;
@@ -115,6 +116,8 @@ public class CriminalIntentJSONSerializer {
 
         JSONArray array = (JSONArray) new JSONTokener(jsonString.toString()).nextValue();
         for (int i = 0; i < array.length(); i++) {
+            JSONObject job = array.getJSONObject(i);
+            Crime crime = new Crime(job);
             crimes.add(new Crime(array.getJSONObject(i)));
         }
         return crimes;

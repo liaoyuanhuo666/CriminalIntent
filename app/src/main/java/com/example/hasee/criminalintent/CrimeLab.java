@@ -63,6 +63,7 @@ public class CrimeLab {
             Log.i(TAG, "save crimes Success");
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.i(TAG, "save crimes fail:" + e);
             return false;
         }
@@ -77,5 +78,10 @@ public class CrimeLab {
             Log.i(TAG, "save crimes2Sdcard fail:" + e);
             return false;
         }
+    }
+
+    public void delete(Crime crime) {
+        mCrimes.remove(crime);
+        saveCrimes();
     }
 }

@@ -1,13 +1,9 @@
 package com.example.hasee.criminalintent;
 
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -18,10 +14,12 @@ public class Crime {
     private String mCrimeTitle;
     private Date mDate;
     private boolean mSolved;
+    private Photo mPhoto;
     private static final String JSON_ID = "id";
     private static final String JSON_TITLE = "title";
     private static final String JSON_DATE = "date";
     private static final String JSON_SOLVED = "solved";
+    private static final String JSON_PHOTO = "photo";
 
     public Crime() {
         mCrimeId = UUID.randomUUID();
@@ -33,6 +31,9 @@ public class Crime {
         if (json.has(JSON_TITLE)) {
             mCrimeTitle = json.getString(JSON_TITLE);
         }
+        if (json.has(JSON_PHOTO)) {
+            mPhoto = new Photo(json.getJSONObject(JSON_PHOTO));
+        }
         mDate = new Date(json.getLong(JSON_DATE));
         mSolved = json.getBoolean(JSON_SOLVED);
     }
@@ -43,6 +44,9 @@ public class Crime {
         json.put(JSON_ID, mCrimeId.toString());
         json.put(JSON_TITLE, mCrimeTitle);
         json.put(JSON_SOLVED, mSolved);
+        if (mPhoto != null) {
+            json.put(JSON_PHOTO, mPhoto.toJSON());
+        }
         return json;
     }
 
@@ -72,6 +76,14 @@ public class Crime {
 
     public void setSolved(boolean solved) {
         this.mSolved = solved;
+    }
+
+    public Photo getPhoto() {
+        return mPhoto;
+    }
+
+    public void setPhoto(Photo photo) {
+        mPhoto = photo;
     }
 
     @Override
