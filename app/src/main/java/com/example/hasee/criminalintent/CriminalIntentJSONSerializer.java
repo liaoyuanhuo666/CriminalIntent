@@ -61,7 +61,7 @@ public class CriminalIntentJSONSerializer {
             File sdDir = Environment.getExternalStorageDirectory();
             File targetFile = new File(sdDir.getCanonicalPath() + File.separator + mFileName);
             RandomAccessFile raf = new RandomAccessFile(targetFile, "rw");
-            raf.seek(targetFile.length());
+            raf.seek(0);
             raf.write(array.toString().getBytes());
             raf.close();
         }

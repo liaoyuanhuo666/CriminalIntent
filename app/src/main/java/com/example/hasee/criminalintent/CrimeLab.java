@@ -25,8 +25,8 @@ public class CrimeLab {
         mApplicationContext = context;
         mSerializer = new CriminalIntentJSONSerializer(mApplicationContext, FILENAME);
         try {
-           // mCrimes = mSerializer.loadCrimes();
-           mCrimes = mSerializer.loadCrimesFromSdcard();
+            mCrimes = mSerializer.loadCrimes();
+         // mCrimes = mSerializer.loadCrimesFromSdcard();
         } catch (Exception e) {
             mCrimes = new ArrayList<>();
             Log.i(TAG, "load crimes fail" + e);
