@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,6 +41,7 @@ public class CrimeFragment extends Fragment {
     public static final String EXTRA_CRIME_ID = "com.example.hasee.criminalintent.crimeId";
     private static final String DIALOG_DATA = "dialog_date";
     private static final String DIALOG_TIME = "dialog_time";
+    private static final String DIALOG_IMAGE = "dialog_image";
     private static final int REQUEST_CODE = 0;
     private static final int REQUEST_CODE_TIME = 1;
     private static final int REQUEST_PHOTO = 2;
@@ -52,7 +52,7 @@ public class CrimeFragment extends Fragment {
     private Button mchooseBtn;
     private CheckBox mSolvedCb;
     private ImageButton mCameraImageBtn;
-    private ImageView mImageView;
+    private ImageView mPhotoImageView;
 
     public static CrimeFragment getInstanse(UUID crimeId) {
         Bundle args = new Bundle();
@@ -89,7 +89,7 @@ public class CrimeFragment extends Fragment {
         mchooseBtn = (Button) view.findViewById(R.id.choose_data_or_time);
         mSolvedCb = (CheckBox) view.findViewById(R.id.crime_solved);
         mCameraImageBtn = (ImageButton) view.findViewById(R.id.crime_camera_imagebtn);
-        mImageView = (ImageView) view.findViewById(R.id.crime_imageview);
+        mPhotoImageView = (ImageView) view.findViewById(R.id.crime_imageview);
 
         mCrimeTitle.addTextChangedListener(new TextWatcher() {
             @Override
@@ -166,7 +166,19 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), CrimeCameraActivity.class);
-                startActivityForResult(intent,REQUEST_PHOTO);
+                startActivityForResult(intent, REQUEST_PHOTO);
+            }
+        });
+        mPhotoImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Photo photo = mCrime.getPhoto();
+                if (photo == null) {
+                    return;
+                }
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                String path = getActivity().getFileStreamPath(photo.getFilename()).getAbsolutePath();
+                ImageFragment.getInstance(path).show(fm, DIALOG_IMAGE);
             }
         });
         boolean hasCamera = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)
@@ -189,6 +201,12 @@ public class CrimeFragment extends Fragment {
     public void onPause() {
         super.onPause();
         CrimeLab.getInstanse(getActivity()).saveCrimes();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        PictureUtils.cleanImageView(mPhotoImageView);
     }
 
     @Override
@@ -232,9 +250,9 @@ public class CrimeFragment extends Fragment {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             mCrime.setDate(date);
             mTimeBtn.setText(Util.timeSdf.format(mCrime.getDate()));
-        } else if (requestCode==REQUEST_PHOTO) {
+        } else if (requestCode == REQUEST_PHOTO) {
             String photoFileName = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
-            if (photoFileName!=null) {
+            if (photoFileName != null) {
                 Photo photo = new Photo(photoFileName);
                 mCrime.setPhoto(photo);
                 showPhoto();
@@ -242,22 +260,18 @@ public class CrimeFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        PictureUtils.cleanImageView(mImageView);
-    }
 
     private void updateDate() {
         mDateBtn.setText(Util.dateSdf.format(mCrime.getDate()));
     }
-    private void showPhoto(){
+
+    private void showPhoto() {
         Photo photo = mCrime.getPhoto();
         BitmapDrawable drawable = null;
-        if (photo!=null) {
+        if (photo != null) {
             String filePath = getActivity().getFileStreamPath(photo.getFilename()).getAbsolutePath();
-            drawable = PictureUtils.getScaleDrawable(getActivity(),filePath);
+            drawable = PictureUtils.getScaleDrawable(getActivity(), filePath);
         }
-        mImageView.setImageDrawable(drawable);
+        mPhotoImageView.setImageDrawable(drawable);
     }
 }

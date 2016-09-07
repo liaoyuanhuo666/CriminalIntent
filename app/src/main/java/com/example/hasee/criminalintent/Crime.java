@@ -19,7 +19,7 @@ public class Crime {
     private static final String JSON_TITLE = "title";
     private static final String JSON_DATE = "date";
     private static final String JSON_SOLVED = "solved";
-    private static final String JSON_PHOTO = "solved";
+    private static final String JSON_PHOTO = "photo";
 
     public Crime() {
         mCrimeId = UUID.randomUUID();
