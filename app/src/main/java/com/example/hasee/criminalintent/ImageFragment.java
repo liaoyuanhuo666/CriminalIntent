@@ -4,6 +4,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,9 @@ import android.widget.ImageView;
  */
 public class ImageFragment extends DialogFragment {
 
+
     private static final String EXTRA_IMAGE_PATH = "com.example.hasee.criminalintent.image_path";
+    private static final String TAG = "ImageFragment";
     private ImageView mImageView;
 
     public static ImageFragment getInstance(String imagePath) {

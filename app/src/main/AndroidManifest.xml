@@ -26,7 +26,8 @@
         <activity
             android:name=".CrimeCameraActivity"
             android:exported="true"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+          >
         </activity>
     </application>
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>

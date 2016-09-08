@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -35,14 +36,14 @@ public class CrimeCameraFragment extends Fragment {
     Button mTakeBtn;
     Camera mCamera;
     private FrameLayout progressContainer;
-     Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
+    Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
         @Override
         public void onShutter() {
             progressContainer.setVisibility(View.VISIBLE);
         }
     };
 
-     Camera.PictureCallback mJpegPicturtCallbck = new Camera.PictureCallback() {
+    Camera.PictureCallback mJpegPicturtCallbck = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
             boolean success = true;
@@ -53,30 +54,36 @@ public class CrimeCameraFragment extends Fragment {
                 os.write(data);
             } catch (Exception e) {
                 e.printStackTrace();
-                success =false;
-            }finally {
-                if (os!=null) {
+                success = false;
+            } finally {
+                if (os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {
                         e.printStackTrace();
-                        success=false;
+                        success = false;
                     }
                 }
             }
             if (success) {
                 Intent intent = new Intent();
-                intent.putExtra(EXTRA_PHOTO_FILENAME,photoFileName);
-                getActivity().setResult(Activity.RESULT_OK,intent);
-            }else {
+                intent.putExtra(EXTRA_PHOTO_FILENAME, photoFileName);
+                String path = getActivity().getFileStreamPath(photoFileName).getAbsolutePath();
+                int digress = PictureUtils.readPictureDegree(path);
+                Log.i(TAG,path+":"+digress);
+                setCameraDisplayOrientation(getActivity(),0,mCamera);
+                getActivity().setResult(Activity.RESULT_OK, intent);
+            } else {
                 getActivity().setResult(Activity.RESULT_CANCELED);
             }
             getActivity().finish();
         }
     };
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
     }
 
     @Nullable
@@ -94,6 +101,7 @@ public class CrimeCameraFragment extends Fragment {
                 if (mCamera != null) {
                     try {
                         mCamera.setPreviewDisplay(holder);
+                       // setDisplayOrientation();
                     } catch (IOException e) {
                         e.printStackTrace();
                         Log.i(TAG, "surfaceCreated failed;" + e);
@@ -109,8 +117,8 @@ public class CrimeCameraFragment extends Fragment {
                 Camera.Parameters params = mCamera.getParameters();
                 Camera.Size size = getBestSupportSize(params.getSupportedPreviewSizes(), width, height);
                 params.setPreviewSize(size.width, size.height);
-                size = getBestSupportSize(params.getSupportedPictureSizes(),width,height);
-                params.setPictureSize(size.width,size.height);
+                size = getBestSupportSize(params.getSupportedPictureSizes(), width, height);
+                params.setPictureSize(size.width, size.height);
                 mCamera.setParameters(params);
                 try {
                     mCamera.startPreview();
@@ -136,9 +144,9 @@ public class CrimeCameraFragment extends Fragment {
         mTakeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               // getActivity().finish();
-                if (mCamera!=null) {
-                    mCamera.takePicture(shutterCallback,null,mJpegPicturtCallbck);
+                // getActivity().finish();
+                if (mCamera != null) {
+                    mCamera.takePicture(shutterCallback, null, mJpegPicturtCallbck);
                 }
             }
         });
@@ -171,6 +179,31 @@ public class CrimeCameraFragment extends Fragment {
             }
         }
         return bestSize;
+    }
+
+    public static void setCameraDisplayOrientation(Activity activity,
+                                                   int cameraId, android.hardware.Camera camera) {
+        android.hardware.Camera.CameraInfo info =
+                new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.getCameraInfo(cameraId, info);
+        int rotation = activity.getWindowManager().getDefaultDisplay()
+                .getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 0; break;
+            case Surface.ROTATION_90: degrees = 90; break;
+            case Surface.ROTATION_180: degrees = 180; break;
+            case Surface.ROTATION_270: degrees = 270; break;
+        }
+
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+        camera.setDisplayOrientation(result);
     }
 
 

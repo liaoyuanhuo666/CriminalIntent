@@ -29,8 +29,9 @@ public class Photo implements Serializable {
         json.put(JSON_FILENAME, mFilename);
         return json;
     }
-
     public String getFilename() {
         return mFilename;
     }
+
+
 }

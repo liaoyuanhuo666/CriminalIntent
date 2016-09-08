@@ -6,7 +6,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +33,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
@@ -90,6 +94,7 @@ public class CrimeFragment extends Fragment {
         mSolvedCb = (CheckBox) view.findViewById(R.id.crime_solved);
         mCameraImageBtn = (ImageButton) view.findViewById(R.id.crime_camera_imagebtn);
         mPhotoImageView = (ImageView) view.findViewById(R.id.crime_imageview);
+        registerForContextMenu(mPhotoImageView);
 
         mCrimeTitle.addTextChangedListener(new TextWatcher() {
             @Override
@@ -181,6 +186,7 @@ public class CrimeFragment extends Fragment {
                 ImageFragment.getInstance(path).show(fm, DIALOG_IMAGE);
             }
         });
+
         boolean hasCamera = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)
                 || Camera.getNumberOfCameras() > 0;
         if (!hasCamera) {
@@ -192,6 +198,25 @@ public class CrimeFragment extends Fragment {
     }
 
     @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        getActivity().getMenuInflater().inflate(R.menu.image_view_item_context, menu);
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.image_item_delete:
+                deleteOldPhoto();
+                mCrime.setPhoto(null);
+                mPhotoImageView.setImageDrawable(null);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         showPhoto();
@@ -200,7 +225,7 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-      //  CrimeLab.getInstanse(getActivity()).saveCrimesToSdcard();
+        //  CrimeLab.getInstanse(getActivity()).saveCrimesToSdcard();
         CrimeLab.getInstanse(getActivity()).saveCrimes();
     }
 
@@ -249,16 +274,30 @@ public class CrimeFragment extends Fragment {
             updateDate();
         } else if (requestCode == REQUEST_CODE_TIME) {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
-            Log.i(TAG,date.toString());
+            Log.i(TAG, date.toString());
             mCrime.setDate(date);
             mTimeBtn.setText(Util.timeSdf.format(mCrime.getDate()));
         } else if (requestCode == REQUEST_PHOTO) {
             String photoFileName = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
             if (photoFileName != null) {
+                deleteOldPhoto();
                 Photo photo = new Photo(photoFileName);
                 mCrime.setPhoto(photo);
                 showPhoto();
             }
+        }
+    }
+
+    private void deleteOldPhoto() {
+        Photo oldPhoto = mCrime.getPhoto();
+        if (oldPhoto==null) {
+            return;
+        }
+        String oldfilePath = getActivity().getFileStreamPath(oldPhoto.getFilename()).getAbsolutePath();
+        File file = new File(oldfilePath);
+        if (file.exists()) {
+            boolean isDelete = file.delete();
+            Log.i(TAG, "old photo delete " + isDelete);
         }
     }
 
@@ -270,6 +309,7 @@ public class CrimeFragment extends Fragment {
     private void showPhoto() {
         Photo photo = mCrime.getPhoto();
         BitmapDrawable drawable = null;
+        Drawable aaa = null;
         if (photo != null) {
             String filePath = getActivity().getFileStreamPath(photo.getFilename()).getAbsolutePath();
             drawable = PictureUtils.getScaleDrawable(getActivity(), filePath);
