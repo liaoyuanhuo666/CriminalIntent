@@ -3,6 +3,7 @@ package com.example.hasee.criminalintent;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -62,9 +63,11 @@ public class CrimeFragment extends Fragment {
     private Button mchooseBtn;
     private Button mReportBtn;
     private Button mSuspectBtn;
+    private Button mCallBtn;
     private CheckBox mSolvedCb;
     private ImageButton mCameraImageBtn;
     private ImageView mPhotoImageView;
+    private EditText numberEt;
 
     public static CrimeFragment getInstanse(UUID crimeId) {
         Bundle args = new Bundle();
@@ -104,16 +107,17 @@ public class CrimeFragment extends Fragment {
         mPhotoImageView = (ImageView) view.findViewById(R.id.crime_imageview);
         mSuspectBtn = (Button) view.findViewById(R.id.crime_suspect_btn);
         mReportBtn = (Button) view.findViewById(R.id.crime_report_btn);
-
+        mCallBtn = (Button) view.findViewById(R.id.crime_call_btn);
+        numberEt = (EditText) view.findViewById(R.id.criminal_number);
         final Intent reportIntent = getReportIntent();
         final Intent contactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
         PackageManager pm = getActivity().getPackageManager();
-       List<ResolveInfo> reportActivityes =  pm.queryIntentActivities(reportIntent,0);
-       List<ResolveInfo> contactActivityes =  pm.queryIntentActivities(contactIntent,0);
-        if (reportActivityes.size()==0) {
+        List<ResolveInfo> reportActivityes = pm.queryIntentActivities(reportIntent, 0);
+        List<ResolveInfo> contactActivityes = pm.queryIntentActivities(contactIntent, 0);
+        if (reportActivityes.size() == 0) {
             mReportBtn.setEnabled(false);
         }
-        if (contactActivityes.size()<=0) {
+        if (contactActivityes.size() <= 0) {
             mSuspectBtn.setEnabled(false);
         }
 
@@ -228,6 +232,21 @@ public class CrimeFragment extends Fragment {
             mSuspectBtn.setText(mCrime.getSuspect());
         }
 
+        mCallBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    String number = numberEt.getText().toString();
+                if (!number.equals("")) {
+                    Uri uri = Uri.parse("tel:"+number);
+                    intent.setData(uri);
+                    startActivity(intent);
+                }
+
+
+            }
+        });
+
 
         boolean hasCamera = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)
                 || Camera.getNumberOfCameras() > 0;
@@ -337,7 +356,34 @@ public class CrimeFragment extends Fragment {
             }
         } else if (requestCode == REQUEST_CONTACT) {
             Uri contectUri = data.getData();
-            String[] queryContacts = new String[]{ContactsContract.Contacts.DISPLAY_NAME};
+            ContentResolver cr = getActivity().getContentResolver();
+            // 取得电话本中开始一项的光标，必须先moveToNext()
+            Cursor cursor = cr.query(contectUri, null,null, null, null);
+            while (cursor.moveToNext()) {
+            //取得联系人的名字索引
+                int nameIndex = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
+                String contact = cursor.getString(nameIndex);
+                mCrime.setSuspect(contact);
+                mSuspectBtn.setText(contact);
+                //取得联系人的ID索引值
+                String contactId = cursor.getString(cursor
+                        .getColumnIndex(ContactsContract.Contacts._ID));
+                Cursor phone = cr.query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "="
+                                + contactId, null, null);
+                //一个人可能有几个号码
+                while (phone.moveToNext()) {
+                    String strPhoneNumber = phone
+                            .getString(phone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    numberEt.setText(strPhoneNumber);
+                    Log.i("TAG", "phoneNumber:" + strPhoneNumber + "contact" + contact);
+                }
+                phone.close();
+            }
+
+            cursor.close();
+           /* String[] queryContacts = new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.HAS_PHONE_NUMBER};
             Cursor cursor = getActivity().getContentResolver().query(contectUri, queryContacts, null, null, null);
             if (cursor==null) {
                 cursor.close();
@@ -347,13 +393,13 @@ public class CrimeFragment extends Fragment {
             String suspect = cursor.getString(0);
             mCrime.setSuspect(suspect);
             mSuspectBtn.setText(suspect);
-            cursor.close();
+            cursor.close();*/
         }
     }
 
     private void deleteOldPhoto() {
         Photo oldPhoto = mCrime.getPhoto();
-        if (oldPhoto==null) {
+        if (oldPhoto == null) {
             return;
         }
         String oldfilePath = getActivity().getFileStreamPath(oldPhoto.getFilename()).getAbsolutePath();

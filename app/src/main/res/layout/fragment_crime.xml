@@ -105,5 +105,17 @@
             android:layout_height="wrap_content"
             />
 
+        <EditText
+            android:id="@+id/criminal_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:text="@string/crime_call_text"
+            android:id="@+id/crime_call_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
     </LinearLayout>
 </ScrollView>
