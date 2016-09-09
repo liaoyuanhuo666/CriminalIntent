@@ -70,8 +70,8 @@ public class CrimeCameraFragment extends Fragment {
                 intent.putExtra(EXTRA_PHOTO_FILENAME, photoFileName);
                 String path = getActivity().getFileStreamPath(photoFileName).getAbsolutePath();
                 int digress = PictureUtils.readPictureDegree(path);
-                Log.i(TAG,path+":"+digress);
-                setCameraDisplayOrientation(getActivity(),0,mCamera);
+                Log.i(TAG, path + ":" + digress);
+                setCameraDisplayOrientation(getActivity(), 0, mCamera);
                 getActivity().setResult(Activity.RESULT_OK, intent);
             } else {
                 getActivity().setResult(Activity.RESULT_CANCELED);
@@ -101,7 +101,7 @@ public class CrimeCameraFragment extends Fragment {
                 if (mCamera != null) {
                     try {
                         mCamera.setPreviewDisplay(holder);
-                       // setDisplayOrientation();
+                        // setDisplayOrientation();
                     } catch (IOException e) {
                         e.printStackTrace();
                         Log.i(TAG, "surfaceCreated failed;" + e);
@@ -156,7 +156,7 @@ public class CrimeCameraFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mCamera = Camera.open(0);
+            mCamera = Camera.open(0);
     }
 
     @Override
@@ -190,10 +190,18 @@ public class CrimeCameraFragment extends Fragment {
                 .getRotation();
         int degrees = 0;
         switch (rotation) {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
         }
 
         int result;

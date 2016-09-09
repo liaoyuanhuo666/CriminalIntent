@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class CrimePagerActivity extends FragmentActivity implements CrimeFragment.CallBacks{
-    private ViewPager mViewPager;
+    public ViewPager mViewPager;
     private ArrayList<Crime> mCrimes;
 
     @Override
@@ -23,6 +23,7 @@ public class CrimePagerActivity extends FragmentActivity implements CrimeFragmen
         setContentView(mViewPager);
         mCrimes = CrimeLab.getInstanse(this).getCrimes();
         FragmentManager fm = getSupportFragmentManager();
+
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fm) {
             @Override
             public Fragment getItem(int position) {
@@ -66,4 +67,6 @@ public class CrimePagerActivity extends FragmentActivity implements CrimeFragmen
     public void onCrimeUpdated(Crime crime) {
 
     }
+
+
 }

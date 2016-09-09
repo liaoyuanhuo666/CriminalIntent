@@ -67,9 +67,10 @@ public class CrimeListFragment extends ListFragment {
             public void onClick(View v) {
                 Crime crime = new Crime();
                 CrimeLab.getInstanse(getActivity()).add(crime);
-                Intent intent = new Intent(getActivity(), CrimePagerActivity.class);
+               /* Intent intent = new Intent(getActivity(), CrimePagerActivity.class);
                 intent.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getCrimeId());
-                startActivityForResult(intent, 0);
+                startActivityForResult(intent, 0);*/
+                mCallBacks.onCrimeSelected(crime);
             }
         });
 

@@ -99,6 +99,7 @@ public class CrimeFragment extends Fragment {
         if (crimeId != null) {
             mCrime = CrimeLab.getInstanse(getActivity()).getCrime(crimeId);
         }
+        mCallBacks.onCrimeUpdated(mCrime);
     }
 
     @TargetApi(11)
@@ -311,6 +312,7 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
         //  CrimeLab.getInstanse(getActivity()).saveCrimesToSdcard();
         CrimeLab.getInstanse(getActivity()).saveCrimes();
     }
@@ -320,6 +322,8 @@ public class CrimeFragment extends Fragment {
         super.onStop();
         PictureUtils.cleanImageView(mPhotoImageView);
     }
+
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -338,11 +342,20 @@ public class CrimeFragment extends Fragment {
                 }
                 return true;
             case R.id.crime_list_item_delete:
+                deleteOldPhoto();
+            /*    mCrime.setPhoto(null);
+                mPhotoImageView.setImageDrawable(null);*/
                 CrimeLab.getInstanse(getActivity()).delete(mCrime);
-                mCrimeTitle.setText("");
+                getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+               /* mCrimeTitle.setText("");
                 mSolvedCb.setChecked(false);
                 mTimeBtn.setText("");
-                mDateBtn.setText("");
+                mDateBtn.setText("");*/
+                mCallBacks.onCrimeUpdated(null);
+                if (NavUtils.getParentActivityName(getActivity()) != null) {
+                    NavUtils.navigateUpFromSameTask(getActivity());
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
 
