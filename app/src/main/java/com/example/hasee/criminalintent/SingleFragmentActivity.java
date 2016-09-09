@@ -14,7 +14,7 @@ public abstract  class SingleFragmentActivity extends FragmentActivity{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fragment);
+        setContentView(getLayoutResId());
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);
         if (fragment==null) {
@@ -23,6 +23,8 @@ public abstract  class SingleFragmentActivity extends FragmentActivity{
         }
     }
 
-
+    protected  int getLayoutResId(){
+        return  R.layout.activity_fragment;
+    }
 
 }

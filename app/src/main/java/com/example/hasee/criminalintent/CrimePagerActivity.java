@@ -11,7 +11,7 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class CrimePagerActivity extends FragmentActivity {
+public class CrimePagerActivity extends FragmentActivity implements CrimeFragment.CallBacks{
     private ViewPager mViewPager;
     private ArrayList<Crime> mCrimes;
 
@@ -62,4 +62,8 @@ public class CrimePagerActivity extends FragmentActivity {
         });
     }
 
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+
+    }
 }

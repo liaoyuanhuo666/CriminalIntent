@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -68,6 +69,7 @@ public class CrimeFragment extends Fragment {
     private ImageButton mCameraImageBtn;
     private ImageView mPhotoImageView;
     private EditText numberEt;
+    CallBacks mCallBacks;
 
     public static CrimeFragment getInstanse(UUID crimeId) {
         Bundle args = new Bundle();
@@ -75,6 +77,18 @@ public class CrimeFragment extends Fragment {
         CrimeFragment fragment = new CrimeFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallBacks = (CallBacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallBacks = null;
     }
 
     @Override
@@ -132,6 +146,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mCrime.setCrimeTitle(s.toString());
+                mCallBacks.onCrimeUpdated(mCrime);
             }
 
             @Override
@@ -192,6 +207,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                mCallBacks.onCrimeUpdated(mCrime);
             }
         });
         mCameraImageBtn.setOnClickListener(new View.OnClickListener() {
@@ -235,10 +251,10 @@ public class CrimeFragment extends Fragment {
         mCallBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    String number = numberEt.getText().toString();
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                String number = numberEt.getText().toString();
                 if (!number.equals("")) {
-                    Uri uri = Uri.parse("tel:"+number);
+                    Uri uri = Uri.parse("tel:" + number);
                     intent.setData(uri);
                     startActivity(intent);
                 }
@@ -342,36 +358,41 @@ public class CrimeFragment extends Fragment {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
             updateDate();
+            mCallBacks.onCrimeUpdated(mCrime);
         } else if (requestCode == REQUEST_CODE_TIME) {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             mCrime.setDate(date);
             mTimeBtn.setText(Util.timeSdf.format(mCrime.getDate()));
+            mCallBacks.onCrimeUpdated(mCrime);
         } else if (requestCode == REQUEST_PHOTO) {
             String photoFileName = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
             if (photoFileName != null) {
                 deleteOldPhoto();
                 Photo photo = new Photo(photoFileName);
                 mCrime.setPhoto(photo);
+                mCallBacks.onCrimeUpdated(mCrime);
                 showPhoto();
             }
+
         } else if (requestCode == REQUEST_CONTACT) {
             Uri contectUri = data.getData();
             ContentResolver cr = getActivity().getContentResolver();
             // 取得电话本中开始一项的光标，必须先moveToNext()
-            Cursor cursor = cr.query(contectUri, null,null, null, null);
+            Cursor cursor = cr.query(contectUri, null, null, null, null);
             while (cursor.moveToNext()) {
-            //取得联系人的名字索引
+                //取得联系人的名字索引
                 int nameIndex = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
                 String contact = cursor.getString(nameIndex);
                 mCrime.setSuspect(contact);
                 mSuspectBtn.setText(contact);
+                mCallBacks.onCrimeUpdated(mCrime);
                 //取得联系人的ID索引值
                 String contactId = cursor.getString(cursor
                         .getColumnIndex(ContactsContract.Contacts._ID));
                 Cursor phone = cr.query(
                         ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "="
-                                + contactId, null, null);
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactId,
+                        null, null);
                 //一个人可能有几个号码
                 while (phone.moveToNext()) {
                     String strPhoneNumber = phone
@@ -381,8 +402,8 @@ public class CrimeFragment extends Fragment {
                 }
                 phone.close();
             }
-
             cursor.close();
+
            /* String[] queryContacts = new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.HAS_PHONE_NUMBER};
             Cursor cursor = getActivity().getContentResolver().query(contectUri, queryContacts, null, null, null);
             if (cursor==null) {
@@ -413,6 +434,7 @@ public class CrimeFragment extends Fragment {
 
     private void updateDate() {
         mDateBtn.setText(Util.dateSdf.format(mCrime.getDate()));
+
     }
 
     private void showPhoto() {
@@ -443,4 +465,9 @@ public class CrimeFragment extends Fragment {
         String report = getString(R.string.crime_report, mCrime.getCrimeTitle(), dateString, solvedString, suspect);
         return report;
     }
+
+    public interface CallBacks {
+        void onCrimeUpdated(Crime crime);
+    }
+
 }

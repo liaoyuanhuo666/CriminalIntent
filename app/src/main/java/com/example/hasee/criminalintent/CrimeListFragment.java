@@ -1,5 +1,7 @@
 package com.example.hasee.criminalintent;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,6 +32,19 @@ public class CrimeListFragment extends ListFragment {
     private boolean mSubTitleVisiable;
     ArrayList<Crime> mCrimes;
     CrimeAdapter adapter;
+    CallBacks mCallBacks;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallBacks = (CallBacks) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallBacks = null;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -125,7 +140,7 @@ public class CrimeListFragment extends ListFragment {
 
     @Override
     public void onResume() {
-        ((CrimeAdapter) getListAdapter()).notifyDataSetChanged();
+        updateUI();
         super.onResume();
     }
 
@@ -168,9 +183,11 @@ public class CrimeListFragment extends ListFragment {
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
                 CrimeLab.getInstanse(getActivity()).add(crime);
-                Intent intent = new Intent(getActivity(), CrimePagerActivity.class);
+                /* Intent intent = new Intent(getActivity(), CrimePagerActivity.class);
                 intent.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getCrimeId());
-                startActivityForResult(intent, 0);
+                startActivityForResult(intent, 0);*/
+                updateUI();
+                mCallBacks.onCrimeSelected(crime);
                 return true;
             case R.id.menu_item_show_subtitle:
                 if (getActivity().getActionBar().getSubtitle() == null) {
@@ -188,12 +205,17 @@ public class CrimeListFragment extends ListFragment {
         }
     }
 
+    public void updateUI() {
+        ((CrimeAdapter) getListAdapter()).notifyDataSetChanged();
+    }
+
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Crime crime = ((CrimeAdapter) getListAdapter()).getItem(position);
-        Intent intent = new Intent(getActivity(), CrimePagerActivity.class);
+      /*  Intent intent = new Intent(getActivity(), CrimePagerActivity.class);
         intent.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getCrimeId());
-        startActivity(intent);
+        startActivity(intent);*/
+        mCallBacks.onCrimeSelected(crime);
     }
 
     class CrimeAdapter extends ArrayAdapter<Crime> {
@@ -222,5 +244,9 @@ public class CrimeListFragment extends ListFragment {
 
             return convertView;
         }
+    }
+
+    public interface CallBacks {
+        void onCrimeSelected(Crime crime);
     }
 }
